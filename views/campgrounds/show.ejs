@@ -1,0 +1,168 @@
+<% layout('layouts/boilerplate') %>
+<link rel="stylesheet" href="/stylesheets/stars.css" >
+
+<style>
+  /* Make the left side sticky while scrolling */
+  body{
+    background-color: #f0f3fa;
+  }
+  .row  {
+      /* font-family: Arial, sans-serif; */
+      margin: 0;
+      padding-left: 10%;
+      padding-right: 10%;
+      
+    }
+
+  /* Enhance styling for the review side */
+  .review-section {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+  }
+
+  .review-card {
+    
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .review-card h4 {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+
+  .starability-result {
+    font-size: 1rem;
+    color: #ffbf00;
+  }
+
+  .form-range {
+    width: 100%;
+  }
+</style>
+
+<div class="row">
+    <!-- Left side: Campground details including date -->
+    <div class="col-md-6 sticky-left">
+        <div class="card mb-3">
+            <img src="<%= campground.image %>" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title"><%= campground.title %></h5>
+                <p class="card-text"><%= campground.description %></p>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <strong>Location:</strong> <%= campground.location %>
+                </li>
+                <li class="list-group-item">
+                    <strong>Price:</strong> $<%= campground.price %>/night
+                </li>
+                <li class="list-group-item">
+                    <strong>Submitted by:</strong> <%= campground.author.username %>
+                </li>
+            </ul>
+            <% if (p) { %>
+            <div class="card-body">
+                <a class="card-link btn btn-info" href="/campgrounds/<%= campground._id %>/edit">Edit</a>
+                <form class="d-inline" action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST">
+                    <button class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+            <% } %>
+            <div class="card-footer text-muted">
+                <%= new Date(campground.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right side: Leave a Review and existing reviews -->
+    <div class="col-md-6">
+        <div class="review-section">
+            <h2>Leave a Review</h2>
+            <form action="/addreview/<%= campground._id %>" method="POST" class="mb-3 validated-form" novalidate>
+                <div class="mb-3">
+                    <label class="form-label" for="rating">Rating</label>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>1</span>
+                        <span>2</span>
+                        <span>3</span>
+                        <span>4</span>
+                        <span>5</span>
+                    </div>
+                    <input class="form-range" type="range" min="1" max="5" name="review[rating]" id="rating">
+                </div>
+                <div class="mb-3 col-12">
+                    <label class="form-label" for="body">Review</label>
+                    <textarea class="form-control" name="review[body]" id="body" cols="30" rows="3" required></textarea>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                </div>
+                <button class="btn btn-success">Submit</button>
+            </form>
+        </div>
+        
+            <h2>All Reviews</h2>
+        <% for (let review of campground.reviews) { %>
+        <div class="review-card" style="position: relative;">
+            <div class="card-body">
+                <h4 class="card-title"><%= review.author.username %></h4>
+
+                <span style="position: absolute; top: 30px; right: 15px; font-size: 18px; color: #666;">
+                    <% 
+                      const createdAt = new Date(review.createdAt); // Convert to Date object
+                      const now = new Date(); // Current date
+                      const timeDiff = Math.abs(now - createdAt); // Difference in milliseconds
+            
+                      // Calculate time units
+                      const minutes = Math.floor(timeDiff / (1000 * 60));
+                      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                      const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+                      const months = Math.floor(days / 30.44); // Average days in a month
+                      const weeks = Math.floor(days / 7);
+                      const years = Math.floor(days / 365.25); // Average days in a year
+                      
+// Format the output
+                    let timeAgo = "";
+                        if (years > 0) {
+                            timeAgo = `${years} year${years > 1 ? "s" : ""} ago`;
+                        } else if (months > 0) {
+                            timeAgo = `${months} month${months > 1 ? "s" : ""} ago`;
+                        } else if (weeks > 0) {
+                            timeAgo = `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+                        } else if (days > 0) {
+                            timeAgo = `${days} day${days > 1 ? "s" : ""} ago`;
+                        } else if (hours > 0) {
+                            timeAgo = `${hours} hour${hours > 1 ? "s" : ""} ago`;
+                        } else if (minutes > 0) {
+                            timeAgo = `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+                        } else {
+                            timeAgo = "Just now";
+                        }
+                    %>
+                    <%= timeAgo %>
+                </span>
+            
+                <p class="starability-result" data-rating="<%= review.rating %>">
+              
+                </p>
+                <p class="card-text" style="font-family: 'Roboto', sans-serif; font-size: 16px; color: #333333; line-height: 1.5; margin: 10px 0; font-weight: 500; "><%= review.body %></p>
+                <% if (check!=false) { %>
+                    <% if (check==review.author.id) { %>
+                <form action="/campgrounds/<%= campground._id %>/<%= review._id %>?_method=DELETE" method="POST">
+                    <button class="btn btn-sm btn-danger">Remove</button>
+                </form>
+                <% } %>
+                <% } %>
+            </div>
+        </div>
+        <% } %>
+    </div>
+</div>

@@ -1,0 +1,56 @@
+<% layout('layouts/boilerplate') %>
+<style>
+    body {
+        background-color: #dde6f3;
+    }
+
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-img-top {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .text-truncate {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+</style>
+
+
+<div class="container my-5">
+    <h1 class="text-center mb-4 display-4 text-primary">All Campgrounds</h1>
+    <div class="d-flex justify-content-end mb-4">
+        <a href="/campgrounds/new" class="btn btn-success btn-lg">Add New Campground</a>
+    </div>
+
+    <div class="row g-4">
+        <% for (let campground of campgrounds) { %>
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow h-100">
+                <img src="<%= campground.image %>" class="card-img-top img-fluid" alt="<%= campground.title %>">
+                <div class="card-body">
+                    <h5 class="card-title text-info"><%= campground.title %></h5>
+                    <p class="card-text text-truncate" style="max-height: 3.5em;"><%= campground.description %></p>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center bg-light">
+                    <span class="text-muted small">
+                        <i class="bi bi-geo-alt-fill text-danger"></i> <%= campground.location %>
+                    </span>
+                    <a href="/campgrounds/<%= campground._id %>" class="btn btn-primary btn-sm">View Details</a>
+                </div>
+            </div>
+        </div>
+        <% } %>
+    </div>
+</div>
